@@ -10,7 +10,7 @@ public class FunctionsTest
 		int variables = 2;
 		Double upperBound = 5.12;
 		Double lowerBound = -5.12;
-		RosenbrockFunc func = new RosenbrockFunc(2, lowerBound, upperBound);
+		RosenbrockFunc func = new RosenbrockFunc(2, lowerBound, upperBound, "Rosenbrock");
 
 
 		Assertions.assertEquals(func.getNumberOfVariables(), variables);

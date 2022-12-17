@@ -18,6 +18,7 @@ public class GeneticAlgorithm
 	private final Comparator<AbstractFunc> comparator = Comparator.comparingDouble(AbstractFunc::evaluate);
 	private final Random randomNumberGenerator;
 	private final int tournamentSize;
+	private final String functionName;
 	public GeneticAlgorithm (GeneticAlgorithmParams algorithmParams, FunctionParams functionParams)
 	{
 		this.upperBound = functionParams.upperBound;
@@ -29,10 +30,10 @@ public class GeneticAlgorithm
 		this.mutationRate = algorithmParams.mutationRate;
 		this.randomNumberGenerator = new Random();
 		this.population = new ArrayList<>(populationSize);
+		this.functionName = functionParams.functionName;
 	}
 	public void run()
 	{
-		initializePopulation();
 		for(int i = 0; i < 5000; i++)
 		{
 			ArrayList<AbstractFunc> matingPool = selection();
@@ -40,19 +41,23 @@ public class GeneticAlgorithm
 			replace(offspring);
 
 		}
+		System.out.println("===============");
+		System.out.println(functionName);
 		System.out.println("x: " + this.population.get(0).variables.get(0));
 		System.out.println("y: " + this.population.get(0).variables.get(1));
 		System.out.println("Value: " + this.population.get(0).evaluate());
-
+		System.out.println(functionName);
 		System.out.println("x: " + this.population.get(1).variables.get(0));
 		System.out.println("y: " + this.population.get(1).variables.get(1));
 		System.out.println("Value: " + this.population.get(1).evaluate());
+		System.out.println("===============");
+
 	}
-	public void initializePopulation()
+	public void initializePopulation(AbstractFunc func)
 	{
 		for (int i = 0; i < this.populationSize; i++)
 		{
-			population.add(new RosenbrockFunc(functionParamSize, lowerBound,upperBound));
+			population.add(func.cloneObject());
 			population.get(i).initialize(functionParamSize);
 		}
 

@@ -26,7 +26,8 @@ public class SimulatedAnnealingAlgorithm
 		this.randomNumberGenerator = new Random();
 		this.solution = new RosenbrockFunc(functionParams.functionParamSize,
 										   functionParams.lowerBound,
-										   functionParams.upperBound);
+										   functionParams.upperBound,
+										   functionParams.functionName);
 		this.bestSolution = this.solution;
 	}
 

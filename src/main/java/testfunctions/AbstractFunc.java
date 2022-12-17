@@ -13,7 +13,7 @@ public abstract class AbstractFunc
 {
 	public List<Double> variables;
 	public List<Bounds> bounds;
-
+	public String name;
 
 	public int getNumberOfVariables() { return bounds.size() ;}
 
