@@ -35,6 +35,7 @@ public class SphereFunc extends AbstractFunc
 			sum += variables.get(i) * variables.get(i);
 		}
 
+		this.result = sum;
 		return sum;
 	}
 

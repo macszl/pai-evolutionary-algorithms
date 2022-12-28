@@ -1,7 +1,5 @@
 import testfunctions.AbstractFunc;
-import testfunctions.RosenbrockFunc;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public class SimulatedAnnealingAlgorithm
@@ -17,6 +15,7 @@ public class SimulatedAnnealingAlgorithm
 	private AbstractFunc solution;
 	private AbstractFunc bestSolution;
 	private final Random randomNumberGenerator;
+	private final int functionParamSize;
 	public SimulatedAnnealingAlgorithm(SimulatedAnnealingAlgorithmParams algorithmParams, FunctionParams functionParams)
 	{
 		this.iterationsCnt = algorithmParams.iterationsCnt;
@@ -24,11 +23,7 @@ public class SimulatedAnnealingAlgorithm
 		this.coolingRate = algorithmParams.coolingRate;
 		this.endTemp = algorithmParams.endTemp;
 		this.randomNumberGenerator = new Random();
-		this.solution = new RosenbrockFunc(functionParams.functionParamSize,
-										   functionParams.lowerBound,
-										   functionParams.upperBound,
-										   functionParams.functionName);
-		this.bestSolution = this.solution;
+		this.functionParamSize = functionParams.functionParamSize;
 	}
 
 	public AbstractFunc getBestSolution ()
@@ -36,7 +31,15 @@ public class SimulatedAnnealingAlgorithm
 		return bestSolution;
 	}
 
-	public void solve()
+	public void initialize(AbstractFunc func)
+	{
+		solution = func.cloneObject();
+		solution.initialize(functionParamSize);
+		bestSolution = solution;
+	}
+
+
+	public void run()
 	{
 		double currentTemperature = startTemp;
 		while( currentTemperature > endTemp)

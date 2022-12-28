@@ -14,6 +14,7 @@ public abstract class AbstractFunc
 	public List<Double> variables;
 	public List<Bounds> bounds;
 	public String name;
+	public Double result;
 
 	public int getNumberOfVariables() { return bounds.size() ;}
 
@@ -39,17 +40,16 @@ public abstract class AbstractFunc
 	public void mutate()
 	{
 		Random rand = new Random();
-		int mutated_idx = rand.nextInt(0, getNumberOfVariables());
-		double elem = variables.get(mutated_idx);
-		double mult = rand.nextDouble(-0.1,0.1);
-		if(elem * mult < bounds.get(mutated_idx).getLowerBound() )
+		for (int i = 0; i < variables.size(); i++)
 		{
-			variables.set(mutated_idx, elem * mult);
+			Double lowerBound = bounds.get(i).getLowerBound();
+			Double upperBound = bounds.get(i).getUpperBound();
+			Double randomValue = rand.nextDouble();
+			Double value = lowerBound + ((upperBound - lowerBound) * randomValue);
+
+			variables.set(i, value);
 		}
-		if(elem * mult < bounds.get(mutated_idx).getUpperBound())
-		{
-			variables.set(mutated_idx, elem * mult);
-		}
+
 	}
 
 	public abstract AbstractFunc cloneObject();

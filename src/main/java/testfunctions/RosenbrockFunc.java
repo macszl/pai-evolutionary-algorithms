@@ -40,6 +40,7 @@ public class RosenbrockFunc extends AbstractFunc
 			sum += (100.0 * temp1 * temp1) + (temp2 * temp2);
 		}
 
+		this.result = sum;
 		return sum;
 	}
 	@Override
