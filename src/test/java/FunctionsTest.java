@@ -7,6 +7,7 @@ public class FunctionsTest
 	@Test
 	void RosenbrockBuildsProperly()
 	{
+
 		int variables = 2;
 		Double upperBound = 5.12;
 		Double lowerBound = -5.12;

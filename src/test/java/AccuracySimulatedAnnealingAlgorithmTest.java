@@ -5,7 +5,7 @@ import testfunctions.SphereFunc;
 
 import java.util.ArrayList;
 
-public class SimulatedAnnealingAlgorithmTest
+public class AccuracySimulatedAnnealingAlgorithmTest
 {
 	@Test
 	void SimulatedAnnealingAlgorithmBuildsProperly()

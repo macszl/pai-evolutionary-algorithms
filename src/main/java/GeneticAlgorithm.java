@@ -1,8 +1,10 @@
 import testfunctions.AbstractFunc;
-import testfunctions.RosenbrockFunc;
 import util.ConstraintMethod;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Random;
 
 import static util.ConstraintHelper.constraint;
 
@@ -14,39 +16,53 @@ public class GeneticAlgorithm
 	// How much percent of our top solutions are kept? Ranges from 0 to 1.
 	private final int eliteIndividuals;
 	private final int functionParamSize;
-	private ArrayList<AbstractFunc> population;
 	private final Comparator<AbstractFunc> comparator = Comparator.comparingDouble(AbstractFunc::evaluate);
 	private final Random randomNumberGenerator;
 	private final int tournamentSize;
 	private final String functionName;
+	private final int epochsCount;
+	public ArrayList<Double> loggedAverages;
+	private ArrayList<AbstractFunc> population;
+
 	public GeneticAlgorithm (GeneticAlgorithmParams algorithmParams, FunctionParams functionParams)
 	{
 		this.functionParamSize = functionParams.functionParamSize;
 		this.populationSize = algorithmParams.populationSize;
-		this.tournamentSize = (int) 20;
-		this.eliteIndividuals = (int ) Math.ceil( (double) populationSize * algorithmParams.elitePercentage);
+		this.tournamentSize = (int) Math.round(populationSize * 0.2);
+		this.eliteIndividuals = (int) Math.ceil((double) populationSize * algorithmParams.elitePercentage);
 		this.mutationRate = algorithmParams.mutationRate;
 		this.randomNumberGenerator = new Random();
 		this.population = new ArrayList<>(populationSize);
 		this.functionName = functionParams.functionName;
+		this.loggedAverages = new ArrayList<>();
+		this.epochsCount = algorithmParams.epochsCount;
 	}
-	public AbstractFunc getBestSolution()
+
+	public AbstractFunc getBestSolution ()
 	{
 		return population.get(0);
 	}
-	public void run()
+
+	public void run (boolean logProgress)
 	{
-		for(int i = 0; i < 100; i++)
+		for (int i = 0; i < this.epochsCount; i++)
 		{
-			for(int j = eliteIndividuals; j < populationSize; j++)
+			//selection should ignore the x % of individuals
+			ArrayList<AbstractFunc> matingPool = selection();
+
+			ArrayList<AbstractFunc> offspring = reproduce(matingPool);
+			replace(offspring);
+
+
+			if( logProgress )
 			{
-				ArrayList<AbstractFunc> matingPool = selection();
-				ArrayList<AbstractFunc> offspring = reproduce(matingPool);
-				replace(offspring);
+				loggedAverages.add(getAverageFitnessOfPopulation());
 			}
+
 		}
 	}
-	public void initializePopulation(AbstractFunc func)
+
+	public void initializePopulation (AbstractFunc func)
 	{
 		for (int i = 0; i < this.populationSize; i++)
 		{
@@ -58,8 +74,7 @@ public class GeneticAlgorithm
 		population.sort(comparator);
 	}
 
-	//selecting the 2 pop
-	public ArrayList<AbstractFunc> selection()
+	public ArrayList<AbstractFunc> selection ()
 	{
 		ArrayList<AbstractFunc> bestSelectedPopulation = new ArrayList<>();
 		//using the tournament method a couple times
@@ -73,37 +88,36 @@ public class GeneticAlgorithm
 				selectedPopulation.add(population.get(a));
 			}
 			AbstractFunc bestPop = compare(selectedPopulation.get(0), selectedPopulation.get(1));
-			if( !bestSelectedPopulation.contains(bestPop))
+			if( !bestSelectedPopulation.contains(bestPop) )
+			{
 				bestSelectedPopulation.add(bestPop);
+			}
 		}
 		bestSelectedPopulation.sort(comparator);
 		return bestSelectedPopulation;
 	}
 
-	//one point crossover method
-	public ArrayList<AbstractFunc> crossover( AbstractFunc chromosome1, AbstractFunc chromosome2)
+	//whole arithmetic crossover method
+	public ArrayList<AbstractFunc> crossover (AbstractFunc chromosome1, AbstractFunc chromosome2)
 	{
 		ArrayList<AbstractFunc> crossedOverList = new ArrayList<>();
 		AbstractFunc offspring = chromosome1.cloneObject();
 		AbstractFunc secondOffspring = chromosome2.cloneObject();
+		double alpha = randomNumberGenerator.nextDouble();
 
-		if (randomNumberGenerator.nextDouble() <= 0.9) {
-			double alpha = randomNumberGenerator.nextDouble();
+		for (int i = 0; i < chromosome1.getNumberOfVariables(); i++)
+		{
+			double upperBound = chromosome1.bounds.get(i).getUpperBound();
+			double lowerBound = chromosome1.bounds.get(i).getLowerBound();
 
-			for (int i = 0; i < chromosome1.getNumberOfVariables(); i++) {
-				double upperBound = chromosome1.bounds.get(i).getUpperBound();
-				double lowerBound = chromosome1.bounds.get(i).getLowerBound();
+			double valueX1 = alpha * chromosome1.variables.get(i) + (1.0 - alpha) * chromosome2.variables.get(i);
+			double valueX2 = alpha * chromosome2.variables.get(i) + (1.0 - alpha) * chromosome1.variables.get(i);
 
-				double valueX1 = alpha * chromosome1.variables.get(i) + (1.0 - alpha) * chromosome2.variables.get(i);
-				double valueX2 = alpha * chromosome2.variables.get(i) + (1.0 - alpha) * chromosome1.variables.get(i);
+			valueX1 = constraint(valueX1, lowerBound, upperBound, ConstraintMethod.BOUND);
+			valueX2 = constraint(valueX2, lowerBound, upperBound, ConstraintMethod.BOUND);
 
-
-				valueX1 = constraint(valueX1, lowerBound, upperBound, ConstraintMethod.BOUND);
-				valueX2 = constraint(valueX2, lowerBound, upperBound, ConstraintMethod.BOUND);
-
-				offspring.variables.set(i, valueX1);
-				secondOffspring.variables.set(i, valueX2);
-			}
+			offspring.variables.set(i, valueX1);
+			secondOffspring.variables.set(i, valueX2);
 		}
 
 
@@ -111,7 +125,7 @@ public class GeneticAlgorithm
 		return crossedOverList;
 	}
 
-	public void replace(ArrayList<AbstractFunc> offspringPopulation)
+	public void replace (ArrayList<AbstractFunc> offspringPopulation)
 	{
 		ArrayList<AbstractFunc> jointPopulation = new ArrayList<>();
 		jointPopulation.addAll(population);
@@ -119,43 +133,61 @@ public class GeneticAlgorithm
 
 		jointPopulation.sort(comparator);
 
-		while (jointPopulation.size() > population.size()) {
+		while (jointPopulation.size() > population.size())
+		{
 			jointPopulation.remove(jointPopulation.size() - 1);
 		}
 		population = jointPopulation;
 	}
-	public ArrayList<AbstractFunc> reproduce( ArrayList<AbstractFunc> parents)
+
+	public ArrayList<AbstractFunc> reproduce (ArrayList<AbstractFunc> parents)
 	{
 		ArrayList<AbstractFunc> offspring = new ArrayList<>();
-		int size = parents.size();
 		while (offspring.size() < parents.size())
 		{
+			int size = parents.size();
 			AbstractFunc parent1 = parents.get(randomNumberGenerator.nextInt(0, size));
-			AbstractFunc parent2 =	parents.get(randomNumberGenerator.nextInt(0, size));
-			if(parent1 != parent2)
+			AbstractFunc parent2 = parents.get(randomNumberGenerator.nextInt(0, size));
+			if( parent1 != parent2 )
 			{
 				ArrayList<AbstractFunc> crossoverResult = crossover(parent1, parent2);
 				for (int i = 0; i < crossoverResult.size(); i++)
 				{
-					if(randomNumberGenerator.nextDouble() <= mutationRate)
+					if( randomNumberGenerator.nextDouble() <= mutationRate )
 					{
 						crossoverResult.get(i).mutate();
 					}
 				}
 				offspring.addAll(crossoverResult);
-				offspring.sort(comparator);
 			}
+			parents.remove(parent1);
+			parents.remove(parent2);
 		}
 		return offspring;
 	}
 
-	public AbstractFunc compare(AbstractFunc pop, AbstractFunc secondPop)
+	public AbstractFunc compare (AbstractFunc pop, AbstractFunc secondPop)
 	{
 		int diff = comparator.compare(pop, secondPop);
-		if(diff >= 0)
+		if( diff >= 0 )
+		{
 			return pop;
+		}
 		else
+		{
 			return secondPop;
+		}
+	}
+
+	public Double getAverageFitnessOfPopulation ()
+	{
+		Double sum = 0.0;
+		for (int i = 0; i < populationSize; i++)
+		{
+			sum += population.get(i).evaluate();
+		}
+
+		return sum / populationSize;
 	}
 
 }

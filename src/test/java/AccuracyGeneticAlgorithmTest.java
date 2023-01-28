@@ -3,10 +3,9 @@ import org.junit.jupiter.api.Assertions;
 import testfunctions.RosenbrockFunc;
 import testfunctions.SphereFunc;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-public class GeneticAlgorithmTest
+public class AccuracyGeneticAlgorithmTest
 {
 	@Test
 	void GeneticalAlgorithmBuildsProperly()
@@ -34,13 +33,13 @@ public class GeneticAlgorithmTest
 		ArrayList<Double> diffList2 = new ArrayList<>();
 		for (int i = 0; i < 10; i++)
 		{
-			int variables = 2;
+			int variables = 5;
 			Double upperBound = 5.12;
 			Double lowerBound = -5.12;
 			RosenbrockFunc func = new RosenbrockFunc(variables, lowerBound, upperBound, "Rosenbrock fun");
 
 			GeneticAlgorithmParams algorithmParams = new GeneticAlgorithmParams();
-			algorithmParams.populationSize = 1000;
+			algorithmParams.populationSize = 400;
 			algorithmParams.elitePercentage = 0.5;
 			algorithmParams.mutationRate = 0.2;
 			FunctionParams functionParams = new FunctionParams();
@@ -51,7 +50,7 @@ public class GeneticAlgorithmTest
 
 			GeneticAlgorithm algorithm = new GeneticAlgorithm(algorithmParams, functionParams);
 			algorithm.initializePopulation(func);
-			algorithm.run();
+			algorithm.run(false);
 
 			diffList.add( 0 - algorithm.getBestSolution().result );
 			diffList1.add( 1 - algorithm.getBestSolution().variables.get(0));
@@ -89,7 +88,7 @@ public class GeneticAlgorithmTest
 
 		GeneticAlgorithm algorithm = new GeneticAlgorithm(algorithmParams, functionParams);
 		algorithm.initializePopulation(func);
-		algorithm.run();
+		algorithm.run(false);
 
 		Assertions.assertNotEquals(algorithm, null);
 	}
