@@ -27,7 +27,7 @@ The following optimization functions are used to test the algorithms:
 
 Each optimization function has its own class and can be used by the algorithms.
 
-##Usage
+## Usage
 To use this project, follow the steps below:
 
 - Clone the project using the command below:
