@@ -30,8 +30,8 @@ Each optimization function has its own class and can be used by the algorithms.
 ## Usage
 To use this project, follow the steps below:
 
-- Clone the project using the command below:
+- Clone the project using the command: git clone https://https://github.com/macszl/pai-evolutionary-algorithms.git
 
-git clone https://https://github.com/macszl/pai-evolutionary-algorithms.git
+- Install all required Maven dependencies
 
 - Compile and run the project
